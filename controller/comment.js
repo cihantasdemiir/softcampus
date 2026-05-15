@@ -11,7 +11,6 @@ exports.postComment = async (req, res) => {
 
     await commentModel.create(discussion_id, user_id, content, anonymous, parentId);
 
-    // Tartışma sayfasına geri dön
     res.redirect('back');
 };
 

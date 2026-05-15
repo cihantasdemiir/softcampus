@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Giriş Yap — SoftCampus</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/style.css"/>
+</head>
+<body>
+
+<nav class="sc-navbar">
+  <div class="container-fluid">
+    <a class="sc-brand" href="/">
+      <div class="sc-brand-icon">SC</div>
+      <div><span class="sc-brand-text">SoftCampus</span><span class="sc-brand-sub">Yazılım Mühendisliği</span></div>
+    </a>
+    <div style="margin-left:auto;">
+      <span style="font-size:0.82rem; color:var(--text-muted);">Hesabın yok mu?</span>
+      <a href="/auth/register"><button class="btn-sc-primary ms-2" style="font-size:0.82rem;">Kayıt Ol</button></a>
+    </div>
+  </div>
+</nav>
+
+<div class="auth-page">
+
+  <div style="position:fixed; top:10%; right:10%; width:400px; height:400px; background:radial-gradient(circle, rgba(79,126,247,0.06) 0%, transparent 70%); pointer-events:none;"></div>
+  <div style="position:fixed; bottom:15%; left:5%; width:300px; height:300px; background:radial-gradient(circle, rgba(155,125,240,0.05) 0%, transparent 70%); pointer-events:none;"></div>
+
+  <div class="auth-card">
+
+    <div class="auth-logo">
+      <div style="display:inline-flex; align-items:center; justify-content:center; width:52px; height:52px; background:linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); border-radius:var(--radius-md); font-family:var(--font-mono); font-weight:700; font-size:1.2rem; color:#fff; margin-bottom:1rem;">SC</div>
+      <h2 style="font-size:1.4rem; font-weight:700; letter-spacing:-0.03em;">Tekrar Hoş Geldin</h2>
+      <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:4px;">SoftCampus hesabına giriş yap</p>
+    </div>
+
+    <div style="background:var(--accent-blue-dim); border:1px solid rgba(79,126,247,0.2); border-radius:var(--radius-md); padding:10px 14px; margin-bottom:1.5rem; display:flex; align-items:center; gap:10px;">
+      <span style="font-size:1rem;">🎓</span>
+      <div>
+        <p style="font-size:0.78rem; color:var(--accent-blue); font-weight:600;">Üniversite Hesabı</p>
+        <p style="font-size:0.72rem; color:var(--text-muted);">Öğrenci emailini kullan (xxx@std.samsun.edu.tr)</p>
+      </div>
+    </div>
+
+    <form action="/auth/login" method="POST">
+
+      <div class="sc-form-group">
+        <label class="sc-label">Öğrenci Email</label>
+        <input
+          type="email"
+          name="email"
+          class="sc-form-control"
+          placeholder="kullanici@std.samsun.edu.tr"
+          value="<%= authInfo.email %>"
+          autocomplete="email"
+        />
+      </div>
+
+      <div class="sc-form-group">
+        <label class="sc-label">Şifre</label>
+        <div style="position:relative;">
+          <input
+            type="password"
+            id="loginPassword"
+            name="password"
+            class="sc-form-control"
+            placeholder="Şifreniz"
+            autocomplete="current-password"
+          />
+          <button type="button" onclick="togglePass('loginPassword')" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:0.9rem;">👁</button>
+        </div>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:1.5rem;">
+        <input type="checkbox" id="rememberMe" name="cbhatirla" value="1" style="width:16px; height:16px; cursor:pointer; accent-color:var(--accent-blue);"/>
+        <label for="rememberMe" style="font-size:0.82rem; color:var(--text-secondary); cursor:pointer;">Beni Hatırla</label>
+      </div>
+
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
+
+      <button type="submit" class="btn-sc-primary" style="width:100%; justify-content:center; padding:11px;">
+        Giriş Yap →
+      </button>
+
+    </form>
+
+    <hr style="border-color:var(--border); margin:1.5rem 0;"/>
+
+    <div style="text-align:center;">
+      <p style="font-size:0.82rem; color:var(--text-muted);">
+        SoftCampus'a yeni misin? <a href="/auth/register" style="color:var(--accent-blue); font-weight:600;">Hesap oluştur</a>
+      </p>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function togglePass(id) {
+  const el = document.getElementById(id);
+  el.type = el.type === 'password' ? 'text' : 'password';
+}
+</script>
+</body>
+</html>

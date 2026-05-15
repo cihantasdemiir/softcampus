@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Galeri — SoftCampus</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    .album-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+
+    .album-cover {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .album-cover-placeholder {
+      width: 100%;
+      height: 220px;
+      background: linear-gradient(135deg, var(--bg-elevated), var(--bg-surface));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+    }
+
+    .slider-container {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slider-track {
+      display: flex;
+      transition: transform 0.3s ease;
+    }
+
+    .slider-track img {
+      min-width: 100%;
+      height: 220px;
+      object-fit: cover;
+    }
+
+    .slider-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0, 0, 0, 0.5);
+      border: none;
+      color: #fff;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      transition: background .2s;
+    }
+
+    .slider-btn:hover {
+      background: rgba(0, 0, 0, 0.8);
+    }
+
+    .slider-btn.prev {
+      left: 10px;
+    }
+
+    .slider-btn.next {
+      right: 10px;
+    }
+
+    /* Lightbox */
+    #lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.92);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    #lightbox.open {
+      display: flex;
+    }
+
+    #lightbox img {
+      max-width: 90vw;
+      max-height: 75vh;
+      object-fit: contain;
+      border-radius: var(--radius-md);
+    }
+
+    #lightbox-close {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.1rem;
+    }
+  </style>
+</head>
+
+<body>
+
+  <%- include('partials/navbar') %>
+
+    <div class="sc-hero-strip">
+      <div class="container">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+          <div>
+            <h1 style="font-size:1.4rem; font-weight:700; letter-spacing:-0.03em;">🖼 Topluluk Galerisi</h1>
+            <p style="font-size:0.875rem; color:var(--text-secondary); margin-top:4px;">Workshop'lar, hackathon'lar,
+              topluluk buluşmaları ve seminerler.</p>
+          </div>
+          <!-- Sadece admin/moderator albüm oluşturabilir -->
+          <% if (locals.session && session.isAuth && (session.role==='admin' || session.role==='moderator' )) { %>
+            <button class="btn-sc-primary" onclick="document.getElementById('createAlbumModal').style.display='flex'">
+              + Yeni Albüm
+            </button>
+            <% } %>
+        </div>
+      </div>
+    </div>
+
+    <div class="container" style="padding-top:2rem; padding-bottom:2rem;">
+
+      <% if (albums.length===0) { %>
+        <div class="sc-card p-4 text-center">
+          <p style="color:var(--text-muted);">Henüz albüm yok.</p>
+        </div>
+        <% } %>
+
+          <div class="row g-4">
+            <% albums.forEach(function(album, albumIndex) { %>
+              <div class="col-lg-6">
+                <div class="album-card">
+
+                  <!-- Fotoğraf slider -->
+                  <div class="slider-container" id="slider-<%= albumIndex %>">
+                    <% if (album.photos.length> 0) { %>
+                      <% if (album.photos.length> 1) { %>
+                        <button class="slider-btn prev" onclick="slidePhoto(<%= albumIndex %>, -1)">‹</button>
+                        <button class="slider-btn next" onclick="slidePhoto(<%= albumIndex %>, 1)">›</button>
+                        <% } %>
+                          <div class="slider-track" id="track-<%= albumIndex %>">
+                            <% album.photos.forEach(function(photo, photoIndex) { %>
+                              <img src="<%= photo.photo_url %>" alt="<%= photo.caption || album.title %>"
+                                onclick="openLightbox('<%= photo.photo_url %>', '<%= photo.caption || album.title %>')"
+                                style="cursor:zoom-in;"
+                                onerror="this.src='https://via.placeholder.com/600x220/1a1f2e/4f7ef7?text=Fotoğraf'" />
+                              <% }); %>
+                          </div>
+                          <!-- Sayaç -->
+                          <div
+                            style="position:absolute; bottom:8px; right:10px; background:rgba(0,0,0,0.5); color:#fff; font-size:0.72rem; padding:2px 8px; border-radius:10px; font-family:var(--font-mono);"
+                            id="counter-<%= albumIndex %>">
+                            1 / <%= album.photos.length %>
+                          </div>
+                          <% } else { %>
+                            <% if (album.cover_url) { %>
+                              <img src="<%= album.cover_url %>" class="album-cover"
+                                onerror="this.src='https://via.placeholder.com/600x220/1a1f2e/4f7ef7?text=Fotoğraf'" />
+                              <% } else { %>
+                                <div class="album-cover-placeholder">🖼</div>
+                                <% } %>
+                                  <% } %>
+                  </div>
+
+                  <!-- Albüm bilgisi -->
+                  <div style="padding:1rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                      <div>
+                        <h4 style="font-size:1rem; font-weight:700; margin-bottom:4px;">
+                          <%= album.title %>
+                        </h4>
+                        <p style="font-size:0.75rem; color:var(--text-muted); font-family:var(--font-mono);">
+                          <%= album.photos.length %> fotoğraf · <%= new
+                              Date(album.created_at).toLocaleDateString('tr-TR') %>
+                        </p>
+                      </div>
+                      <!-- Admin/moderator işlemleri -->
+                      <% if (locals.session && (session.role==='admin' || session.role==='moderator' )) { %>
+                        <div style="display:flex; gap:8px; align-items:center;">
+                          <button onclick="showAddPhoto(<%= album.id %>)"
+                            style="background:none; border:none; color:var(--accent-blue); font-size:0.78rem; cursor:pointer;">+
+                            Fotoğraf</button>
+                          <a href="/gallery/delete/<%= album.id %>"
+                            onclick="return confirm('Albümü silmek istediğinize emin misiniz?')"
+                            style="color:var(--accent-red); font-size:0.78rem;">🗑</a>
+                        </div>
+                        <% } %>
+                    </div>
+
+                    <!-- Fotoğraf ekleme formu (admin/mod) -->
+                    <% if (locals.session && (session.role==='admin' || session.role==='moderator' )) { %>
+                      <div id="add-photo-<%= album.id %>"
+                        style="display:none; margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid var(--border);">
+                        <form action="/gallery/photo/add/<%= album.id %>" method="POST" enctype="multipart/form-data">
+                          <div class="sc-form-group" style="margin-bottom:0.5rem;">
+                            <label class="sc-label" style="font-size:0.78rem;">Dosyadan Yükle</label>
+                            <input type="file" name="photo_file" class="sc-form-control" accept="image/*"
+                              style="font-size:0.82rem;" />
+                          </div>
+                          <div class="sc-form-group" style="margin-bottom:0.5rem;">
+                            <label class="sc-label" style="font-size:0.78rem;">veya URL Gir</label>
+                            <input type="url" name="photo_url" class="sc-form-control" placeholder="https://..."
+                              style="font-size:0.85rem;" />
+                          </div>
+                          <div class="sc-form-group" style="margin-bottom:0.5rem;">
+                            <input type="text" name="caption" class="sc-form-control"
+                              placeholder="Başlık / Açıklama (opsiyonel)" style="font-size:0.85rem;" />
+                          </div>
+                          <div style="display:flex; gap:8px;">
+                            <button type="submit" class="btn-sc-primary"
+                              style="font-size:0.78rem; padding:4px 12px;">Ekle</button>
+                            <button type="button" onclick="hideAddPhoto(<%= album.id %>)" class="btn-sc-ghost"
+                              style="font-size:0.78rem; padding:4px 12px;">İptal</button>
+                          </div>
+                          <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
+                        </form>
+                      </div>
+                      <% } %>
+
+                        <!-- Fotoğraf listesi (küçük thumbnails) -->
+                        <% if (album.photos.length> 0) { %>
+                          <div style="display:flex; gap:6px; margin-top:0.75rem; flex-wrap:wrap;">
+                            <% album.photos.forEach(function(photo, photoIndex) { %>
+                              <div style="position:relative;">
+                                <img src="<%= photo.photo_url %>"
+                                  onclick="goToSlide(<%= albumIndex %>, <%= photoIndex %>); openLightbox('<%= photo.photo_url %>', '<%= photo.caption || '' %>')"
+                                  style="width:48px; height:48px; object-fit:cover; border-radius:var(--radius-sm); cursor:pointer; border:2px solid var(--border); transition:border-color .15s;"
+                                  onmouseover="this.style.borderColor='var(--accent-blue)'"
+                                  onmouseout="this.style.borderColor='var(--border)'"
+                                  onerror="this.src='https://via.placeholder.com/48/1a1f2e/4f7ef7?text=?'" />
+                                <% if (locals.session && (session.role==='admin' || session.role==='moderator' )) { %>
+                                  <a href="/gallery/photo/delete/<%= photo.id %>"
+                                    onclick="return confirm('Fotoğrafı silmek istediğinize emin misiniz?')"
+                                    style="position:absolute; top:-6px; right:-6px; background:var(--accent-red); color:#fff; border-radius:50%; width:16px; height:16px; display:flex; align-items:center; justify-content:center; font-size:0.6rem; text-decoration:none;">✕</a>
+                                  <% } %>
+                              </div>
+                              <% }); %>
+                          </div>
+                          <% } %>
+                  </div>
+
+                </div>
+              </div>
+              <% }); %>
+          </div>
+    </div>
+
+    <!-- Albüm Oluşturma Modal -->
+    <% if (locals.session && session.isAuth && (session.role==='admin' || session.role==='moderator' )) { %>
+      <div id="createAlbumModal"
+        style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center; padding:1rem;"
+        onclick="if(event.target===this)this.style.display='none'">
+        <div
+          style="background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-xl); width:100%; max-width:500px; padding:2rem;">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 style="font-size:1.1rem;">Yeni Albüm Oluştur</h3>
+            <button onclick="document.getElementById('createAlbumModal').style.display='none'"
+              style="background:none; border:none; color:var(--text-muted); font-size:1.3rem; cursor:pointer;">✕</button>
+          </div>
+          <form action="/gallery/create" method="POST">
+            <div class="sc-form-group">
+              <label class="sc-label">Albüm Başlığı</label>
+              <input type="text" name="title" class="sc-form-control" placeholder="örn. Spring Hackathon 2025"
+                required />
+            </div>
+            <div class="sc-form-group">
+              <label class="sc-label">Kapak Fotoğrafı URL (opsiyonel)</label>
+              <input type="url" name="cover_url" class="sc-form-control" placeholder="https://..." />
+            </div>
+            <div class="d-flex gap-2 justify-content-end mt-3">
+              <button type="button" class="btn-sc-ghost"
+                onclick="document.getElementById('createAlbumModal').style.display='none'">İptal</button>
+              <button type="submit" class="btn-sc-primary">Albüm Oluştur</button>
+            </div>
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
+          </form>
+        </div>
+      </div>
+      <% } %>
+
+        <!-- Lightbox -->
+        <div id="lightbox" onclick="if(event.target===this||event.target.id==='lightbox')closeLightbox()">
+          <button id="lightbox-close" onclick="closeLightbox()">✕</button>
+          <img id="lightbox-img" src="" alt="" />
+          <p id="lightbox-caption"
+            style="color:var(--text-secondary); margin-top:1rem; font-size:0.9rem; text-align:center;"></p>
+        </div>
+        <div style="min-height: 20vh;"></div>
+        <%- include('partials/footer') %>
+
+          <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+          <script src="/js/main.js"></script>
+          <script>
+            // Slider state
+            const sliderState = {};
+
+            function slidePhoto(albumIndex, direction) {
+              const track = document.getElementById('track-' + albumIndex);
+              const images = track.querySelectorAll('img');
+              const total = images.length;
+              if (!sliderState[albumIndex]) sliderState[albumIndex] = 0;
+              sliderState[albumIndex] = (sliderState[albumIndex] + direction + total) % total;
+              track.style.transform = 'translateX(-' + (sliderState[albumIndex] * 100) + '%)';
+              const counter = document.getElementById('counter-' + albumIndex);
+              if (counter) counter.textContent = (sliderState[albumIndex] + 1) + ' / ' + total;
+            }
+
+            function goToSlide(albumIndex, photoIndex) {
+              const track = document.getElementById('track-' + albumIndex);
+              if (!track) return;
+              const total = track.querySelectorAll('img').length;
+              sliderState[albumIndex] = photoIndex;
+              track.style.transform = 'translateX(-' + (photoIndex * 100) + '%)';
+              const counter = document.getElementById('counter-' + albumIndex);
+              if (counter) counter.textContent = (photoIndex + 1) + ' / ' + total;
+            }
+
+            function openLightbox(src, caption) {
+              document.getElementById('lightbox-img').src = src;
+              document.getElementById('lightbox-caption').textContent = caption;
+              document.getElementById('lightbox').classList.add('open');
+              document.body.style.overflow = 'hidden';
+            }
+
+            function closeLightbox() {
+              document.getElementById('lightbox').classList.remove('open');
+              document.body.style.overflow = '';
+            }
+
+            function showAddPhoto(albumId) {
+              document.getElementById('add-photo-' + albumId).style.display = 'block';
+            }
+
+            function hideAddPhoto(albumId) {
+              document.getElementById('add-photo-' + albumId).style.display = 'none';
+            }
+
+            document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+          </script>
+</body>
+
+</html>

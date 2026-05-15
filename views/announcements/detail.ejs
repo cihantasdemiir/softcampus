@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>
+    <%= data.title %> — SoftCampus
+  </title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+
+<body>
+
+  <%- include('../partials/navbar') %>
+
+    <div class="container" style="padding-top:2rem; padding-bottom:2rem; max-width:960px;">
+
+      <div
+        style="display:flex; align-items:center; gap:6px; font-size:0.78rem; color:var(--text-muted); margin-bottom:1.5rem; font-family:var(--font-mono);">
+        <a href="/" style="color:var(--text-muted);">Ana Sayfa</a>
+        <span>/</span>
+        <span style="color:var(--text-secondary);">Duyurular</span>
+        <span>/</span>
+        <span style="color:var(--accent-blue);">
+          <%= data.title %>
+        </span>
+      </div>
+
+      <div class="row g-4">
+
+        <div class="col-lg-8">
+
+          <div style="display:flex; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:1.5rem;">
+            <span
+              class="tag tag-<%= data.category === 'event' ? 'blue' : data.category === 'internship' ? 'green' : data.category === 'workshop' ? 'purple' : data.category === 'deadline' ? 'amber' : 'teal' %>">
+              <%= data.category==='event' ? '📅 Etkinlik' : data.category==='internship' ? '💼 Staj' :
+                data.category==='workshop' ? '🛠 Workshop' : data.category==='deadline' ? '⚠️ Son Tarih' : '📢 Haber' %>
+            </span>
+            <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-muted);">
+              <%= new Date(data.created_at).toLocaleDateString('tr-TR') %>
+            </span>
+          </div>
+
+          <h1 style="font-size:1.75rem; font-weight:700; letter-spacing:-0.03em; margin-bottom:1.25rem;">
+            <%= data.title %>
+          </h1>
+
+          <div class="detail-content">
+            <%- data.content %>
+          </div>
+
+          <hr style="border-color:var(--border); margin:2rem 0;" />
+
+          <a href="/" class="btn-sc-ghost btn">← Ana Sayfaya Dön</a>
+
+        </div>
+
+        <div class="col-lg-4">
+          <div class="sc-widget" style="position:sticky; top:80px;">
+            <div class="sc-widget-title">Duyuru Bilgileri</div>
+            <div style="display:flex; flex-direction:column; gap:12px;">
+              <div>
+                <div
+                  style="font-size:0.7rem; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted); margin-bottom:3px;">
+                  Kategori</div>
+                <div style="font-size:0.9rem; color:var(--text-primary); font-weight:500;">
+                  <%= data.category %>
+                </div>
+              </div>
+              <div>
+                <div
+                  style="font-size:0.7rem; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted); margin-bottom:3px;">
+                  Yayınlanma Tarihi</div>
+                <div style="font-size:0.9rem; color:var(--text-primary); font-weight:500;">
+                  <%= new Date(data.created_at).toLocaleDateString('tr-TR', { day:'numeric', month:'long',
+                    year:'numeric' }) %>
+                </div>
+              </div>
+              <div>
+                <div
+                  style="font-size:0.7rem; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted); margin-bottom:3px;">
+                  Durum</div>
+                <% if (data.is_active) { %>
+                  <span class="tag tag-green">Aktif</span>
+                  <% } else { %>
+                    <span class="tag tag-gray">Pasif</span>
+                    <% } %>
+              </div>
+            </div>
+            <% if (locals.session && session.isAuth && (session.role==='admin' || session.role==='moderator' )) { %>
+              <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border);">
+                <a href="/admin/edit/anc/<%= data.id %>" class="btn-sc-ghost btn w-100 text-center"
+                  style="font-size:0.85rem;">✏️ Düzenle</a>
+              </div>
+              <% } %>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div style="min-height: 40vh;"></div>
+    <%- include('../partials/footer') %>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

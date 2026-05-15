@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Duyuru Listesi — SoftCampus</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+
+<body>
+
+  <%- include('../partials/navbar') %>
+
+    <div class="container" style="padding-top:2rem; padding-bottom:2rem;">
+      <div class="d-flex align-items-center justify-content-between mb-4">
+        <h2 style="font-size:1.3rem; font-weight:700;">Duyuru Listesi</h2>
+        <a href="/admin/add/anc"><button class="btn-sc-primary">+ Yeni Duyuru</button></a>
+      </div>
+
+      <div
+        style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.25rem;">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Başlık</th>
+              <th>Kategori</th>
+              <th>Tarih</th>
+              <th>Durum</th>
+              <th>İşlemler</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% data.forEach(function(anc) { %>
+              <tr>
+                <td style="color:var(--text-primary); font-weight:500;">
+                  <%= anc.title %>
+                </td>
+                <td><span class="tag tag-blue">
+                    <%= anc.category %>
+                  </span></td>
+                <td><span class="date-chip">
+                    <%= new Date(anc.created_at).toLocaleDateString('tr-TR') %>
+                  </span></td>
+                <td>
+                  <% if (anc.is_active) { %>
+                    <span class="tag tag-green">Aktif</span>
+                    <% } else { %>
+                      <span class="tag tag-gray">Pasif</span>
+                      <% } %>
+                </td>
+                <td>
+                  <div class="d-flex gap-1">
+                    <a href="/admin/pin/anc/<%= anc.id %>">
+                      <button class="btn-sc-ghost" style="font-size:0.75rem; padding:4px 10px;">
+                        <%= anc.is_pinned ? '📌 Sabiti Kaldır' : '📌 Sabitle' %>
+                      </button>
+                    </a>
+                    <a href="/admin/edit/anc/<%= anc.id %>"><button class="btn-sc-ghost"
+                        style="font-size:0.75rem; padding:4px 10px;">Düzenle</button></a>
+                    <a href="/admin/delete/anc/<%= anc.id %>"
+                      onclick="return confirm('Silmek istediğinize emin misiniz?')"><button class="btn-sc-danger"
+                        style="font-size:0.75rem; padding:4px 10px;">Sil</button></a>
+                  </div>
+                </td>
+              </tr>
+              <% }); %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div style="min-height: 51vh;"></div>
+    <%- include('../partials/footer') %>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+      <script src="/js/main.js"></script>
+</body>
+
+</html>

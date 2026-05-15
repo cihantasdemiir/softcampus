@@ -1,0 +1,27 @@
+{
+  "name": "softcampus",
+  "version": "1.0.0",
+  "description": "SoftCampus — Software Engineering Student Community Platform",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "body-parser": "^2.2.2",
+    "cookie-parser": "^1.4.7",
+    "csrf-csrf": "^4.0.3",
+    "ejs": "^3.1.10",
+    "express": "^4.18.2",
+    "express-session": "^1.19.0",
+    "multer": "^2.1.1",
+    "pg": "^8.20.0",
+    "slugify": "^1.6.9"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "author": "SoftCampus Department",
+  "license": "MIT"
+}

@@ -1,0 +1,66 @@
+<nav class="sc-navbar">
+  <div class="container-fluid">
+    <a class="sc-brand" href="/">
+      <div class="sc-brand-icon">SC</div>
+      <div>
+        <span class="sc-brand-text">SoftCampus</span>
+        <span class="sc-brand-sub">Yazılım Mühendisliği</span>
+      </div>
+    </a>
+    <button class="sc-hamburger" onclick="document.getElementById('mobileNav').classList.toggle('open')">☰</button>
+    <div class="sc-nav-center" id="mobileNav" style="display:flex; flex:1; align-items:center; gap:1rem;">
+      <ul class="sc-nav-links ms-4">
+        <li><a href="/">⌂ Ana Sayfa</a></li>
+        <li><a href="/discussions">💬 Tartışmalar</a></li>
+        <li><a href="/gallery">🖼 Galeri</a></li>
+        <% if (locals.session && session.isAuth && (session.role==='admin' || session.role==='moderator' )) { %>
+          <li><a href="/admin">⚙️ Admin Paneli</a></li>
+          <% } %>
+      </ul>
+      <div class="sc-nav-auth">
+        <!-- Ziyaretçi istatistikleri -->
+        <div style="display:flex; flex-direction:column; align-items:flex-end; margin-right:12px; gap:2px;">
+          <span style="font-size:0.68rem; color:var(--text-muted); font-family:var(--font-mono);">
+            👥 <span style="color:var(--accent-blue); font-weight:600;">
+              <%= visitorCount %>
+            </span> ziyaretçi
+          </span>
+          <span style="font-size:0.68rem; color:var(--text-muted); font-family:var(--font-mono);">
+            <span class="online-dot" style="width:6px; height:6px; display:inline-block;"></span>
+            <span style="color:var(--accent-green); font-weight:600;">
+              <%= activeCount %>
+            </span> aktif
+          </span>
+        </div>
+        <% if (locals.session && session.isAuth) { %>
+          <div style="position:relative;">
+            <button onclick="toggleDropdown()"
+              style="background:none; border:1px solid var(--border); border-radius:var(--radius-md); padding:6px 12px; cursor:pointer; display:flex; align-items:center; gap:8px; color:var(--text-primary);">
+              <span style="font-size:0.82rem; font-family:var(--font-mono);">👤 <%= session.fullname %></span>
+              <span style="font-size:0.7rem; color:var(--text-muted);">▾</span>
+            </button>
+            <div id="userDropdown"
+              style="display:none; position:absolute; right:0; top:calc(100% + 8px); background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-md); min-width:180px; z-index:999; overflow:hidden;">
+              <a href="/settings"
+                style="display:flex; align-items:center; gap:10px; padding:10px 16px; color:var(--text-secondary); font-size:0.85rem; text-decoration:none; transition:background .15s;"
+                onmouseover="this.style.background='var(--bg-elevated)'"
+                onmouseout="this.style.background='transparent'">
+                ⚙️ Ayarlar
+              </a>
+              <div style="border-top:1px solid var(--border);"></div>
+              <a href="/auth/signout"
+                style="display:flex; align-items:center; gap:10px; padding:10px 16px; color:var(--accent-red); font-size:0.85rem; text-decoration:none; transition:background .15s;"
+                onmouseover="this.style.background='var(--bg-elevated)'"
+                onmouseout="this.style.background='transparent'">
+                🚪 Çıkış Yap
+              </a>
+            </div>
+          </div>
+          <% } else { %>
+            <a href="/auth/login"><button class="btn-sc-ghost">Giriş Yap</button></a>
+            <a href="/auth/register"><button class="btn-sc-primary">Kayıt Ol</button></a>
+            <% } %>
+      </div>
+    </div>
+  </div>
+</nav>

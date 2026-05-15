@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Duyuru Ekle — SoftCampus</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/style.css"/>
+</head>
+<body>
+
+<%- include('../partials/navbar') %>
+
+<div class="container" style="padding-top:2rem; padding-bottom:2rem; max-width:700px;">
+  <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg); padding:2rem;">
+    <h2 style="font-size:1.3rem; font-weight:700; margin-bottom:1.5rem;">Duyuru Ekle</h2>
+
+    <form action="/admin/add/anc" method="POST">
+
+      <div class="sc-form-group">
+        <label class="sc-label">Başlık</label>
+        <input type="text" name="title" class="sc-form-control" required/>
+      </div>
+
+      <div class="sc-form-group">
+        <label class="sc-label">İçerik</label>
+        <textarea name="content" class="sc-form-control" rows="6" required></textarea>
+      </div>
+
+      <div class="sc-form-group">
+        <label class="sc-label">Kategori</label>
+        <select name="category" class="sc-form-control">
+          <option value="event">Etkinlik</option>
+          <option value="internship">Staj</option>
+          <option value="workshop">Workshop</option>
+          <option value="news">Haber</option>
+          <option value="deadline">Son Tarih</option>
+        </select>
+      </div>
+
+      <div class="sc-form-group">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <input type="checkbox" name="isActive" value="1" id="isActive" checked style="width:16px; height:16px; accent-color:var(--accent-blue);"/>
+          <label for="isActive" style="font-size:0.85rem; color:var(--text-secondary);">Aktif olarak yayınla</label>
+        </div>
+      </div>
+
+      <div class="d-flex gap-2 mt-3">
+        <button type="submit" class="btn-sc-primary">Kaydet</button>
+        <a href="/admin/list/anc"><button type="button" class="btn-sc-ghost">İptal</button></a>
+      </div>
+
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
+
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/main.js"></script>
+</body>
+</html>

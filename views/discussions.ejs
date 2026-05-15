@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+   <meta charset="UTF-8" />
+   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+   <title>Tartışmalar — SoftCampus</title>
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+   <link rel="stylesheet" href="/css/style.css" />
+</head>
+
+<body>
+
+   <%- include('partials/navbar') %>
+
+      <div class="sc-hero-strip">
+         <div class="container">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+               <div>
+                  <h1 style="font-size:1.4rem; font-weight:700; letter-spacing:-0.03em;">💬 Tartışmalar</h1>
+                  <p style="font-size:0.875rem; color:var(--text-secondary); margin-top:4px;">Soru sor, bilgi paylaş,
+                     konuları tartış. Anonim paylaşım desteklenir.</p>
+               </div>
+               <% if (locals.session && session.isAuth) { %>
+                  <a href="/discussions/create"><button class="btn-sc-primary">+ Yeni Konu</button></a>
+                  <% } else { %>
+                     <a href="/auth/login"><button class="btn-sc-primary">Konu Açmak için Giriş Yap</button></a>
+                     <% } %>
+            </div>
+         </div>
+      </div>
+
+      <div class="container" style="padding-top:2rem; padding-bottom:2rem;">
+         <div class="row g-4">
+
+            <div class="col-lg-8">
+
+               <div class="d-flex gap-2 mb-4 flex-wrap">
+                  <select class="sc-form-control" style="max-width:200px;"
+                     onchange="window.location.href='/discussions?category='+this.value">
+                     <option value="" <%=selectedCategory==='all' ? 'selected' : '' %>>Tüm Kategoriler</option>
+                     <option value="Backend" <%=selectedCategory==='Backend' ? 'selected' : '' %>>Backend</option>
+                     <option value="Frontend" <%=selectedCategory==='Frontend' ? 'selected' : '' %>>Frontend</option>
+                     <option value="Career" <%=selectedCategory==='Career' ? 'selected' : '' %>>Kariyer</option>
+                     <option value="Internship" <%=selectedCategory==='Internship' ? 'selected' : '' %>>Staj</option>
+                     <option value="University Life" <%=selectedCategory==='University Life' ? 'selected' : '' %>
+                        >Üniversite Hayatı</option>
+                     <option value="Algorithms" <%=selectedCategory==='Algorithms' ? 'selected' : '' %>>Algoritmalar
+                     </option>
+                     <option value="General" <%=selectedCategory==='General' ? 'selected' : '' %>>Genel</option>
+                  </select>
+               </div>
+
+               <div id="discussions-list">
+
+                  <% if (discussions.length===0) { %>
+                     <div class="sc-card p-4 text-center">
+                        <p style="color:var(--text-muted);">Henüz tartışma yok. İlk konuyu sen aç!</p>
+                     </div>
+                     <% } %>
+
+                        <% discussions.forEach(function(disc) { %>
+                           <div class="sc-card discussion-card" onclick="window.location.href='/discussions/<%= disc.slug %>'" style="cursor:pointer;">
+                              <div class="discussion-vote-col">
+                                 <span class="vote-count">
+                                    <%= disc.views %>
+                                 </span>
+                                 <span style="font-size:0.65rem; color:var(--text-muted);">görüntü</span>
+                              </div>
+                              <div class="discussion-main">
+                                 <!-- Sağ üstte sabitleme butonu -->
+                                 <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                                    <div class="announcement-meta" style="margin-bottom:0.5rem;">
+                                       <span
+                                          class="tag tag-<%= disc.category === 'Backend' ? 'blue' : disc.category === 'Frontend' ? 'amber' : disc.category === 'Career' ? 'purple' : disc.category === 'Internship' ? 'green' : disc.category === 'Algorithms' ? 'teal' : 'gray' %>">
+                                          <%= disc.category %>
+                                       </span>
+                                       <% if (disc.is_anonymous) { %>
+                                          <span class="anon-badge">👤 Anonim</span>
+                                          <% } else { %>
+                                             <span
+                                                style="font-size:0.78rem; color:var(--text-muted); font-family:var(--font-mono);">
+                                                <%= disc.fullname %>
+                                             </span>
+                                             <% } %>
+                                                <span class="date-chip">
+                                                   <%= new Date(disc.created_at).toLocaleDateString('tr-TR') %>
+                                                </span>
+                                                <% if (disc.is_pinned) { %>
+                                                   <span
+                                                      style="font-size:0.75rem; color:var(--text-muted); font-weight:700; font-family:var(--font-mono);">📌
+                                                      Sabitlenmiş</span>
+                                                   <% } %>
+                                    </div>
+                                    <!-- Sağ üst: sabitleme ve silme -->
+                                    <div style="display:flex; gap:6px; flex-shrink:0;">
+                                       <% if (locals.session && (session.role==='admin' || session.role==='moderator' ))
+                                          { %>
+                                          <a href="/discussions/pin/<%= disc.id %>"
+                                             style="font-size:0.75rem; color:var(--accent-amber); white-space:nowrap;">
+                                             <%= disc.is_pinned ? '📌 Sabiti Kaldır' : '📌 Sabitle' %>
+                                          </a>
+                                          <a href="/discussions/delete/<%= disc.id %>"
+                                             onclick="return confirm('Silmek istediğinize emin misiniz?')"
+                                             style="font-size:0.75rem; color:var(--accent-red);">🗑 Sil</a>
+                                          <% } %>
+                                    </div>
+                                 </div>
+
+
+                                      <h3 class="discussion-title"><%= disc.title %></h3>
+
+                                       <% if (disc.content && disc.content.length> 0) { %>
+                                          <p
+                                             style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:0.5rem;">
+                                             <%= disc.content.substring(0, 150) %>
+                                                <%= disc.content.length> 150 ? '...' : '' %>
+                                          </p>
+                                          <% } %>
+
+                                             <!-- Sağ alt: like/dislike -->
+                                             <div class="discussion-stats"
+                                                style="display:flex; align-items:center; justify-content:space-between;">
+                                                <div style="display:flex; gap:10px;">
+                                                   <span>👁 <%= disc.views %> görüntüleme</span>
+                                                   <span>🕐 <%= new Date(disc.created_at).toLocaleDateString('tr-TR') %>
+                                                   </span>
+                                                   <span>💬 <%= disc.comment_count || 0 %> yorum</span>
+                                                </div>
+                                                <!-- Like/dislike butonları -->
+                                                <div style="display:flex; align-items:center; gap:6px;">
+                                                   <% if (locals.session && session.isAuth) { %>
+                                                      <form action="/discussions/vote/<%= disc.id %>" method="POST"
+                                                         style="display:inline;">
+                                                         <input type="hidden" name="vote" value="1" />
+                                                         <button type="submit"
+                                                            style="background:none; border:1px solid var(--border); border-radius:var(--radius-sm); padding:3px 8px; cursor:pointer; color:var(--accent-green); font-size:0.8rem;">
+                                                            👍 <%= disc.likes %>
+                                                         </button>
+                                                         <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
+                                                      </form>
+                                                      <form action="/discussions/vote/<%= disc.id %>" method="POST"
+                                                         style="display:inline;">
+                                                         <input type="hidden" name="vote" value="-1" />
+                                                         <button type="submit"
+                                                            style="background:none; border:1px solid var(--border); border-radius:var(--radius-sm); padding:3px 8px; cursor:pointer; color:var(--accent-red); font-size:0.8rem;">
+                                                            👎 <%= disc.dislikes %>
+                                                         </button>
+                                                         <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
+                                                      </form>
+                                                      <% } else { %>
+                                                         <span style="font-size:0.8rem; color:var(--text-muted);">👍 <%=
+                                                               disc.likes %> · 👎 <%= disc.dislikes %></span>
+                                                         <% } %>
+                                                </div>
+                                             </div>
+                              </div>
+                           </div>
+                           <% }); %>
+
+               </div>
+            </div>
+
+            <div class="col-lg-4">
+
+               <div class="sc-widget">
+                  <div class="sc-widget-title">Kategorilere Göz At</div>
+                  <div style="display:flex; flex-direction:column; gap:4px;">
+                     <div onclick="window.location.href='/discussions'"
+                        style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; border-radius:var(--radius-sm); cursor:pointer; transition:background .15s;"
+                        onmouseover="this.style.background='var(--bg-elevated)'"
+                        onmouseout="this.style.background='transparent'">
+                        <span style="font-size:0.85rem; color:var(--text-secondary);">🌐 Tüm Kategoriler</span>
+                     </div>
+                     <div onclick="window.location.href='/discussions?category=Backend'"
+                        style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; border-radius:var(--radius-sm); cursor:pointer; transition:background .15s;"
+                        onmouseover="this.style.background='var(--bg-elevated)'"
+                        onmouseout="this.style.background='transparent'">
+                        <span style="font-size:0.85rem; color:var(--text-secondary);">⚙️ Backend</span>
+                     </div>
+                     <div onclick="window.location.href='/discussions?category=Frontend'"
+                        style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; border-radius:var(--radius-sm); cursor:pointer; transition:background .15s;"
+                        onmouseover="this.style.background='var(--bg-elevated)'"
+                        onmouseout="this.style.background='transparent'">
+                        <span style="font-size:0.85rem; color:var(--text-secondary);">🖥 Frontend</span>
+                     </div>
+                     <div onclick="window.location.href='/discussions?category=Career'"
+                        style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; border-radius:var(--radius-sm); cursor:pointer; transition:background .15s;"
+                        onmouseover="this.style.background='var(--bg-elevated)'"
+                        onmouseout="this.style.background='transparent'">
+                        <span style="font-size:0.85rem; color:var(--text-secondary);">💼 Kariyer</span>
+                     </div>
+                     <div onclick="window.location.href='/discussions?category=Internship'"
+                        style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; border-radius:var(--radius-sm); cursor:pointer; transition:background .15s;"
+                        onmouseover="this.style.background='var(--bg-elevated)'"
+                        onmouseout="this.style.background='transparent'">
+                        <span style="font-size:0.85rem; color:var(--text-secondary);">🎯 Staj</span>
+                     </div>
+                     <div onclick="window.location.href='/discussions?category=Algorithms'"
+                        style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; border-radius:var(--radius-sm); cursor:pointer; transition:background .15s;"
+                        onmouseover="this.style.background='var(--bg-elevated)'"
+                        onmouseout="this.style.background='transparent'">
+                        <span style="font-size:0.85rem; color:var(--text-secondary);">🧮 Algoritmalar</span>
+                     </div>
+                     <div onclick="window.location.href='/discussions?category=University Life'"
+                        style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; border-radius:var(--radius-sm); cursor:pointer; transition:background .15s;"
+                        onmouseover="this.style.background='var(--bg-elevated)'"
+                        onmouseout="this.style.background='transparent'">
+                        <span style="font-size:0.85rem; color:var(--text-secondary);">🏫 Üniversite Hayatı</span>
+                     </div>
+                     <div onclick="window.location.href='/discussions?category=General'"
+                        style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; border-radius:var(--radius-sm); cursor:pointer; transition:background .15s;"
+                        onmouseover="this.style.background='var(--bg-elevated)'"
+                        onmouseout="this.style.background='transparent'">
+                        <span style="font-size:0.85rem; color:var(--text-secondary);">💭 Genel Tartışma</span>
+                     </div>
+                  </div>
+               </div>
+
+               <div class="sc-widget" style="border-color: rgba(155,125,240,0.3);">
+                  <div class="sc-widget-title" style="color:var(--accent-purple);">👤 Anonim Paylaşım</div>
+                  <p style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:0.75rem;">
+                     İsminizle sormaktan çekindiğiniz sorular mı var? Anonim paylaşım desteklenir.
+                  </p>
+                  <div
+                     style="background:var(--bg-input); border-radius:var(--radius-sm); padding:8px 12px; border:1px solid var(--border);">
+                     <p style="font-size:0.75rem; color:var(--text-muted); font-family:var(--font-mono);">
+                        ✓ Kimliğiniz tamamen gizli kalır<br>
+                        ✓ Moderatörler spam'i kaldırabilir<br>
+                        ✓ Konu açarken anonim seçeneğini işaretleyin
+                     </p>
+                  </div>
+               </div>
+
+            </div>
+         </div>
+      </div>
+
+      <%- include('partials/footer') %>
+         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+         <script src="/js/main.js"></script>
+</body>
+
+</html>
